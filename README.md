@@ -1,17 +1,19 @@
-# TM Bot
+# Bot Messenger
 
-### Features:
+## Features:
 
-- HTML Parsing;
-- Logging;
-- Usage of external API (Telegram);
-- Tasks scheduling;
-- NoSQL database;
-- Production and Development environments;
-- Docker deployment;
-- Configuration file.
+1. HTML Parsing;
+2. Logging;
+3. Usage of external API (Telegram);
+4. Tasks scheduling;
+5. NoSQL database;
+6. Production and Development environments;
+7. Docker deployment;
+8. Configuration file.
 
-### TODO
+## **TODO**
 
-1. News
-2. Asynchronous flow
+* News
+* Asynchronous flow
+* Docker: attach volume 
+* Pin chat messages

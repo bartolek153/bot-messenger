@@ -14,11 +14,13 @@ class Job:
     def __init__(self):
         self.dao = DAO.get_instance()
 
-    # @only_business_time
+    @only_business_time
     def execute(self):
         """
         Executes the job scraper. Retrieves jobs, parses them, saves them to the database,
-        and sends alerts for new job listings.
+        and sends alerts when there are new job listings.
+
+        Skips execution when off schedule (09h-20h).
         """
 
         logging.info("Fetch jobs...")
@@ -26,7 +28,7 @@ class Job:
         try:
             jobs = self._get_jobs()
 
-            if jobs == None:  # couldn't get jobs
+            if jobs is None:  # couldn't get jobs
                 return
 
             job_count = 0
@@ -41,12 +43,14 @@ class Job:
                     job_count += 1
 
                 self.dao.created = True
-                logging.info("Database created and data was loaded successfully.")
+                logging.info(
+                    "Database created and data was loaded successfully.")
 
             else:
                 # after being run for the first time, it will start sending alerts
 
-                job_history = self._parse_jobs(jobs, constants.LIMIT_JOBS_PER_FETCH)
+                job_history = self._parse_jobs(
+                    jobs, constants.LIMIT_JOBS_PER_FETCH)
 
                 for job in job_history:
 
@@ -100,8 +104,8 @@ class Job:
         Parses job listings HTML to extract relevant information.
 
         Args:
-            jobs (str): Job listings HTML.
-            limit (int, optional): Maximum number of jobs to retrieve. Defaults to None.
+            `jobs` (str): Job listings HTML.
+            `limit` (int, optional): Maximum number of jobs to retrieve. Defaults to None.
 
         Returns:
             List: List of dictionaries containing job details.
@@ -149,7 +153,7 @@ class Job:
         dictionaries and removing unnecessary characters.
 
         Args:
-            json (list): Dictionary containing job details.
+            `json` (list): Dictionary containing job details.
         """
 
         KEYS = constants.JOB_FIELDS.keys()
@@ -167,8 +171,8 @@ class Job:
         Sends an alert for a new job listing.
 
         Args:
-            job (dict): Dictionary containing job details.
-            insert_emojis (bool): option to add emojis to the message
+            `job` (dict): Dictionary containing job details.
+            `insert_emojis` (bool): option to add emojis to the message
         """
 
         message = "Nova vaga cadastrada:\n\n"

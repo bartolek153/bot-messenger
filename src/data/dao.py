@@ -1,4 +1,4 @@
-"""Data Access Object"""
+"""Data Access Layer"""
 
 import logging
 import os
@@ -18,6 +18,12 @@ class DAO:
 
     @staticmethod
     def get_instance():
+        """
+        Gets the unique instance of data access object
+
+        Returns:
+            object: the object to read and write data to the database
+        """
         if DAO._instance is None:
             DAO()
 
@@ -27,7 +33,7 @@ class DAO:
         path = os.path.join(parent_dir, "data", "db.json")
 
         if os.path.exists(path):
-            DAO.created = False
+            DAO.created = True
         else:
             logging.info("Empty database created")
 
@@ -38,7 +44,8 @@ class DAO:
         self.news = self.db.table("News")
 
         if DAO._instance is not None:
-            raise Exception("Data access object can't have more than one instance.")
+            raise Exception(
+                "Data access object can't have more than one instance.")
         else:
             DAO._instance = self
 

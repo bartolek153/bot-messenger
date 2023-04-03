@@ -11,8 +11,8 @@ from models.news import News
 def main():
     """start point"""
 
-    # os.environ["ENV"] = "development"  
-    set_environment("development")
+    # os.environ["ENV"] = "development"
+    set_environment("production")
 
     _job = Job()
     _menu = Menu()

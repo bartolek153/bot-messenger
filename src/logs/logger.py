@@ -31,6 +31,7 @@ def register_development_logger():
 
 
 def register_production_logger():
+    # on production environment, creates a .log file
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
 
