@@ -1,5 +1,8 @@
 import os
+import configparser
 
+_config = configparser.ConfigParser()
+_config.read("credentials.ini")
 
 # URLs
 
@@ -9,24 +12,30 @@ HOME_URL = f"{HOST}/Home"
 VAGAS_URL = f"{HOST}/VagaEstagio/Pesquisar"
 
 
-# User Credentials to access the website
+# user credentials to access the website
 
-USUARIO = {"Usuario": os.environ["FESA_USER"], "Senha": os.environ["FESA_PASS"]}
+USUARIO = {
+    "Usuario": _config["Portal"]["User"],
+    "Senha": _config["Portal"]["Password"]
+}
 
 
-# Telegram API keys
+# telegram api keys and chat ids
 
-TELEGRAM_API_TOKEN = ""
+TELEGRAM_API_TOKEN = _config["Telegram"]["Token"]
+USE_EMOJIS = _config["Telegram"]["UseEmojis"]
 
 CARDAPIO_CHAT_ID = ""
 VAGAS_CHAT_ID = ""
 NOTICIAS_CHAT_ID = ""
 
 
-# Program configs
+# program constants
 
-os.environ["ENV"] = "development"
+MAX_ATTEMPTS = int(_config["GET Behavior"]["Attempts"])
+INTERVAL_MINUTES = int(_config["GET Behavior"]["Interval"])
 
+""" Menu consts """
 ID_DIV_CARDAPIO = "colapseCardapioSemanal"
 DIAS_SEMANA = {
     0: "Segunda-feira",
@@ -36,7 +45,19 @@ DIAS_SEMANA = {
     4: "Sexta-feira",
 }
 
-MAX_ATTEMPTS = 3
-INTERVAL_MINUTES = 2 * 60
-
+""" Jobs consts """
 LIMIT_JOBS_PER_FETCH = 3
+JOB_FIELDS = {
+    "Data do Cadastro": ":calendar:",
+    "Empresa": ":office_building:",
+    "Cargo": ":briefcase:",
+    "Tipo": ":label:",
+    "Local": ":round_pushpin:",
+    "Requisitos": ":check_mark_button:",
+    "Benefícios": ":money_bag:",
+    "Descrição": ":clipboard:",
+    "Observações": ":pushpin:"
+}
+
+""" News consts """
+ID_DIV_NOTICIAS = "colapseQuadroAvisos"

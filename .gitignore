@@ -2,6 +2,8 @@
 .venv/
 .vscode/
 credentials.ini
+exemplo.html
+*.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

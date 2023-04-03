@@ -1,28 +1,29 @@
 """general usage functions"""
 
 import datetime
-from logs import logger
 import logging
 import os
 import time
 
 import constants
+from logs import logger
+from requests import Response
 
 
 def vm_localtime(hour: int, minute: int = 0) -> str:
     """
     Converts Brazil's specified time to the running machine local time, in HH:mm format.
 
-        Parameters:
-            hour (int)
-            minute (int) -- default is 0
+    Parameters:
+        `hour` (int): the hour of the day in Brazil to be converted to local time
+        `minute` (int, optional): the minute of the hour in Brazil to be converted to local time, defaults to 0
 
-        Returns:
-            local time (string)
+    Returns:
+        str: the local time in HH:mm format
     """
 
     if hour == None:
-        raise Exception("Filling hour is mandatory.")
+        raise Exception("Filling hour argument is mandatory.")
 
     # Create a datetime object representing the given time in Brazil
     brazil_time = datetime.datetime.combine(
@@ -40,18 +41,26 @@ def vm_localtime(hour: int, minute: int = 0) -> str:
         tzinfo=datetime.timezone(datetime.timedelta(hours=-3))
     ).astimezone(local_tz)
 
-    # Print the result
-    # print(local_time.strftime('%H:%M'))
-
     return local_time.strftime("%H:%M")
 
 
 def only_weekday(func):
+    """
+    A decorator that wraps a function and only allows it to run if it's a weekday (Monday to Friday).
+
+    Parameters:
+        `func` (callable): the function to wrap
+
+    Returns:
+        callable: a wrapped version of the function that only runs on weekdays
+    """
+
     def wrapper(*args, **kwargs):
         today = datetime.datetime.now()
-        weekday = today.weekday() # Retorna um número entre 0 e 6, sendo 0 segunda-feira e 6 domingo
-        
-        if weekday < 5: # Se for segunda a sexta-feira (0 a 4)
+        # Retorna um número entre 0 e 6, sendo 0 segunda-feira e 6 domingo
+        weekday = today.weekday()
+
+        if weekday < 5:  # Se for segunda a sexta-feira (0 a 4)
             return func(*args, **kwargs)
         else:
             print("weekend")
@@ -60,23 +69,67 @@ def only_weekday(func):
 
 
 def only_business_time(func):
+    """
+    A decorator that wraps a function and only allows it to run during business hours (9:00 to 20:00).
+
+    Parameters:
+        `func` (callable): the function to wrap
+
+    Returns:
+        callable: a wrapped version of the function that only runs during business hours
+    """
+
     def wrapper(*args, **kwargs):
         now = datetime.datetime.now().time()
 
         if datetime.time(9, 0) <= now <= datetime.time(20, 0):
-                return func(*args, **kwargs)
-        else:
-            print("time not allowed")
+            return func(*args, **kwargs)
 
     return wrapper
 
 
-async def fetch():
-    pass
+def make_request(session, url, data=None) -> Response:
+    """
+    Placeholder function that makes a request to a specified URL.
+
+    Parameters:
+        `session` (object): the session object to use for the request
+        `url` (str): the URL to request
+        `data` (dict, optional): any data to send with the request, defaults to None
+
+    Returns:
+        response object resulted of the request made
+    """
+
+    with session:
+        if data:
+            return session.get(url, data)
+        else:
+            return session.get(url)
+
+
+def save_to_file(content, filename):
+    """
+    Designed to store strings with big content in a separate file.
+
+    Parameters:
+        `content` (str): content of new file
+        `filename` (str): name of destiny file
+    """
+    with open(filename, "w") as file:
+        file.write(content)
 
 
 def set_environment(environment):
-    # environment = os.environ.get("ENV")
+    """
+    Sets variables and some settings based on the specified environment.
+
+    Parameters:
+        `environment` (str): the name of the environment to set
+
+    Raises:
+        Exception: if the specified environment is invalid
+    """
 
     if environment == "development":
         constants.VAGAS_CHAT_ID = constants.CARDAPIO_CHAT_ID = constants.NOTICIAS_CHAT_ID = (
@@ -84,15 +137,15 @@ def set_environment(environment):
         )
 
         logger.register_development_logger()
-        logging.warn("running in development mode")       
+        logging.warn("Running in DEVELOPMENT mode")
 
     elif environment == "production":
-        constants.VAGAS_CHAT_ID = "-1001909104760" 
-        constants.CARDAPIO_CHAT_ID = "-1001663438555" 
+        constants.VAGAS_CHAT_ID = "-1001909104760"
+        constants.CARDAPIO_CHAT_ID = "-1001663438555"
         # constants.NOTICIAS_CHAT_ID = ""
 
         logger.register_production_logger()
-        logging.warn("running in PRODUCTION mode!")
+        logging.warn("Running in PRODUCTION mode!")
 
     else:
         raise Exception(f"Problems setting {environment} environment.")

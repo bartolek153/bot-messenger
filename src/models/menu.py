@@ -11,6 +11,9 @@ from telegram_channels import channels as ch
 class Menu:
     @only_weekday
     def execute(self):
+
+        logging.info("Starting menu execution")
+
         try:
             menu = asyncio.run(self.get_menu())
 
@@ -19,7 +22,7 @@ class Menu:
 
             menu = self.extract_info(menu)
             self.send_alert(menu)
-
+            logging.info("Menu sent with success")
 
         except Exception as e:
             logging.exception(e)

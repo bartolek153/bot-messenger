@@ -14,7 +14,7 @@ sys.path.append(parent_dir)
 
 class DAO:
     _instance = None
-    exists = False
+    created = False
 
     @staticmethod
     def get_instance():
@@ -27,7 +27,7 @@ class DAO:
         path = os.path.join(parent_dir, "data", "db.json")
 
         if os.path.exists(path):
-            DAO.exists = True
+            DAO.created = False
         else:
             logging.info("Empty database created")
 

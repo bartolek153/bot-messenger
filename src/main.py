@@ -12,7 +12,7 @@ def main():
     """start point"""
 
     # os.environ["ENV"] = "development"  
-    set_environment("production")
+    set_environment("development")
 
     _job = Job()
     _menu = Menu()
