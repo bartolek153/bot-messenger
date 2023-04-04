@@ -27,14 +27,11 @@ _news = News()
 
 set_environment("development")
 
-
 def test_job_execution():
     _job.execute()
 
-
 def test_menu_execution():
     _menu.execute()
-
 
 async def test_telegram_bot():
     bot = telegram.Bot(constants.TELEGRAM_API_TOKEN)
@@ -42,21 +39,13 @@ async def test_telegram_bot():
         # print(await bot.get_me())
         print((await bot.get_updates()))
 
-
 def test_messaging():
     ch.send(constants.VAGAS_CHAT_ID, "teste")
 
+def test_request_helper():
+    make_request("asdf", "GET")
 
-def test_scheduling():
-    schedule.every(1).day.at(vm_localtime(17)).do(_job.execute())
-    schedule.every(1).hour.do(_menu.execute())
-    schedule.every(1).hour.do(_news.execute())
-
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
-
-
-test_job_execution()
+# test_job_execution()
 # test_menu_execution()
 # test_messaging()
+test_request_helper()

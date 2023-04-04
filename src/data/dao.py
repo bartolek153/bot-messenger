@@ -15,6 +15,7 @@ sys.path.append(parent_dir)
 class DAO:
     _instance = None
     created = False
+    size = 0
 
     @staticmethod
     def get_instance():
@@ -34,6 +35,7 @@ class DAO:
 
         if os.path.exists(path):
             DAO.created = True
+            DAO.size = os.path.getsize(path)
         else:
             logging.info("Empty database created")
 
