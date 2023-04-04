@@ -1,4 +1,6 @@
-# Bot Messenger
+# Bot Messenger 
+
+A python script, scheduled to run periodically, which analyzes the latest contents of HTML pages, processes them and sends the obtained data to a Telegram channel.
 
 ## Features:
 
@@ -13,7 +15,14 @@
 
 ## **TODO**
 
-* News
-* Asynchronous flow
-* Docker: attach volume 
-* Pin chat messages
+* Deploy:
+    - Create a deploy script
+    - Attach data volume (db + logs)
+
+* New Features:
+    - Get `News` section
+    - Pin chat messages
+
+* Code Improvement:
+    - Asynchronous flow
+    - Comments and docstrings
