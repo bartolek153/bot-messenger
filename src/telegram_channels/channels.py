@@ -5,13 +5,13 @@ import constants
 
 
 def send(chat_id, message):
-    asyncio.run(_send_mesage_api(chat_id, message))    
+    asyncio.run(_send_message_api(chat_id, message))    
 
 def pin(chat_id, message):
     asyncio.run()
 
 
-async def _send_mesage_api(id, message):
+async def _send_message_api(id, message):
     bot = telegram.Bot(constants.TELEGRAM_API_TOKEN)
     
     async with bot:

@@ -88,7 +88,7 @@ def only_business_time(func):
     return wrapper
 
 
-def make_request(session, url, data=None) -> Response:
+def make_request(url, method, session=None, data=None) -> Response:
     """
     Placeholder function that makes a request to a specified URL.
 
@@ -101,23 +101,55 @@ def make_request(session, url, data=None) -> Response:
         response object resulted of the request made
     """
 
-    with session:
-        if data:
-            return session.get(url, data)
-        else:
-            return session.get(url)
+    try:
+        with session:
+            if data:
+                return session.get(url, data)
+            else:
+                return session.get(url)
+    except Exception as e:
+        logging.error(f"An error occurred while making a request: {e}")
+        return None
 
 
-def save_to_file(content, filename):
+def write_to_file(content, filename):
     """
     Designed to store strings with big content in a separate file.
 
     Parameters:
-        `content` (str): content of new file
-        `filename` (str): name of destiny file
+        `content` (str)
+        `filename` (str)
     """
     with open(filename, "w") as file:
         file.write(content)
+
+
+def append_to_file(content, filename):
+    """
+    Appends text to a file. If the file doesn't exists, create a new file.
+
+    Parameters:
+        `content` (str)
+        `filename` (str)
+    """
+
+    with open(filename, "a") as f:
+        f.write
+
+
+def read_file(filename) -> str:
+    """
+    Gets the text of a file.
+
+    Parameters:
+        `filename` (str)
+
+    Returns:
+        str: content of the file.
+    """
+
+    with open(filename, "r") as f:
+        return f.read()
 
 
 def set_environment(environment):

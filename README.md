@@ -26,3 +26,4 @@ A python script, scheduled to run periodically, which analyzes the latest conten
 * Code Improvement:
     - Asynchronous flow
     - Comments and docstrings
+    - Use environment variables for production and development status

@@ -2,6 +2,7 @@ import requests
 import logging
 from bs4 import BeautifulSoup
 from typing import List
+import os
 import time
 
 import constants
@@ -23,7 +24,7 @@ class Job:
         Skips execution when off schedule (09h-20h).
         """
 
-        logging.info("Fetch jobs...")
+        logging.info("Fetching jobs...")
 
         try:
             jobs = self._get_jobs()
@@ -33,7 +34,7 @@ class Job:
 
             job_count = 0
 
-            if not self.dao.created:
+            if not self.dao.created or self.dao.size == 0:
                 # in the first execution, save the entire database
 
                 job_history = self._parse_jobs(jobs)
@@ -50,16 +51,17 @@ class Job:
                 # after being run for the first time, it will start sending alerts
 
                 job_history = self._parse_jobs(
-                    jobs, constants.LIMIT_JOBS_PER_FETCH)
+                    jobs, constants.LIMIT_JOBS_PER_FETCH
+                )
 
-                for job in job_history:
+                for job in list(reversed(job_history)):
 
                     # if the job is already registered, do not alert
                     if not self._exists_db(job):
                         self._insert_db(job)
                         job_count += 1
 
-                        self._send_job_alert(job, True)
+                        self._send_job_alert(job, False)
 
             return logging.info(f"{job_count} jobs inserted.")
 
@@ -77,9 +79,6 @@ class Job:
 
         # TODO: helper.make_request
 
-        # TODO: helper.read_file
-        # with open("tst.html", "r") as f:
-        #     return f.read()
 
         for attempt in range(constants.MAX_ATTEMPTS):
 
@@ -99,7 +98,7 @@ class Job:
             logging.critical("Problems found when trying to get jobs")
             return None
 
-    def _parse_jobs(self, jobs: str, limit: int = None) -> List:
+    def _parse_jobs(self, jobs: str, limit: int = None) -> List[dict]:
         """
         Parses job listings HTML to extract relevant information.
 
@@ -142,12 +141,12 @@ class Job:
                 _job.clear()
 
         final_result = self._format_jobs(
-            _jobs_list if limit is not None else _jobs_list[:limit]
+            _jobs_list[:limit] if limit is not None else _jobs_list
         )
 
         return final_result
 
-    def _format_jobs(self, jobs: List) -> list[dict]:
+    def _format_jobs(self, jobs: List) -> List[dict]:
         """
         Formats job details by transforming it in readable
         dictionaries and removing unnecessary characters.
@@ -164,9 +163,11 @@ class Job:
             values = [detail.replace("\n", "").strip() for detail in job]
             _formatted_results.append(dict(zip(KEYS, values)))
 
+        _formatted_results.reverse()  # 'order by date'
+
         return _formatted_results
 
-    def _send_job_alert(self, job: dict, insert_emojis: bool = False):
+    def _send_job_alert(self, job: dict, insert_emojis: bool = False) -> None:
         """
         Sends an alert for a new job listing.
 
@@ -178,21 +179,20 @@ class Job:
         message = "Nova vaga cadastrada:\n\n"
 
         if insert_emojis:
-            formatter.emojis(message, job)
+            message = formatter.emojis(message, job)
         else:
             message += "\n".join(
-                [f"{key}: {value.capitalize()}"]
+                f"{key}: {value.capitalize()}"
                 for key, value in job.items()
-                if not value
+                if value
             )
 
         channels.send(constants.VAGAS_CHAT_ID, message)
 
-    def _exists_db(self, job) -> bool:
-        # Checks if a job listing already exists in the database.
-
+    def _exists_db(self, job) -> bool:  
+        """checks if a job listing already exists in the database"""
         search = self.dao.jobs.search(self.dao.query.fragment(job))
-        return len(search) > 0
+        return len(search) > 0  
 
     def _insert_db(self, job) -> None:
         self.dao.jobs.insert(job)
