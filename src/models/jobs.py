@@ -24,7 +24,7 @@ class Job:
         Skips execution when off schedule (09h-20h).
         """
 
-        logging.info("Fetch jobs...")
+        logging.info("Fetching jobs...")
 
         try:
             jobs = self._get_jobs()
@@ -51,16 +51,17 @@ class Job:
                 # after being run for the first time, it will start sending alerts
 
                 job_history = self._parse_jobs(
-                    jobs, constants.LIMIT_JOBS_PER_FETCH)
+                    jobs, constants.LIMIT_JOBS_PER_FETCH
+                )
 
-                for job in job_history:
+                for job in list(reversed(job_history)):
 
                     # if the job is already registered, do not alert
                     if not self._exists_db(job):
                         self._insert_db(job)
                         job_count += 1
 
-                        self._send_job_alert(job, True)
+                        self._send_job_alert(job, False)
 
             return logging.info(f"{job_count} jobs inserted.")
 

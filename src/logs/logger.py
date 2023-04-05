@@ -27,7 +27,7 @@ def register_development_logger():
     logger.setLevel(logging.DEBUG)
 
     logger.handlers = [get_stream_handler()]
-    logging.info("logger active")
+    logging.info("Logger active")
 
 
 def register_production_logger():
@@ -37,4 +37,4 @@ def register_production_logger():
 
     logger.addHandler(get_file_handler())
     logger.addHandler(get_stream_handler())
-    logging.info("logger active")
+    logging.info("Logger active")

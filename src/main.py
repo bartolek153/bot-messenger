@@ -9,14 +9,11 @@ from models.news import News
 
 
 def main():
-    """start point"""
 
-    # os.environ["ENV"] = "development"
     set_environment("production")
 
     _job = Job()
     _menu = Menu()
-    # _news = News()
 
     def cardapio_job():
         _menu.execute()
@@ -24,14 +21,10 @@ def main():
     def vagas_job():
         _job.execute()
 
-    # def noticias_job():
-    #     _news.execute()
-
     schedule.every(1).day.at(vm_localtime(17)).do(cardapio_job)
     schedule.every(2).hours.do(vagas_job)
-    # schedule.every(1).hour.do(noticias_job)
 
-    logging.info("tasks scheduled")
+    logging.info("Tasks scheduled")
 
     while True:
         schedule.run_pending()
