@@ -2,6 +2,7 @@ import logging
 import os
 import schedule
 
+from environment import production_environment
 from helper import *
 from models.jobs import Job
 from models.menu import Menu
@@ -10,7 +11,7 @@ from models.news import News
 
 def main():
 
-    set_environment("production")
+    production_environment()
 
     _job = Job()
     _menu = Menu()

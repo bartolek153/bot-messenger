@@ -12,6 +12,7 @@ import telegram
 from telegram_channels import channels as ch, formatter as mf
 
 import constants
+from environment import development_environment
 from helper import *
 from logs import logger
 from models.jobs import Job
@@ -20,12 +21,12 @@ from models.news import News
 
 from datetime import datetime
 
+development_environment()
 
 _job = Job()
 _menu = Menu()
 _news = News()
 
-set_environment("development")
 
 def test_job_execution():
     _job.execute()

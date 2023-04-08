@@ -170,34 +170,3 @@ def read_file(filename: str) -> str:
 
     with open(filename, "r") as f:
         return f.read()
-
-
-def set_environment(environment):
-    """
-    Sets variables and some settings based on the specified environment.
-
-    Parameters:
-        `environment` (str): the name of the environment to set
-
-    Raises:
-        Exception: if the specified environment is invalid
-    """
-
-    if environment == "development":
-        constants.VAGAS_CHAT_ID = (
-        constants.CARDAPIO_CHAT_ID
-        ) = constants.NOTICIAS_CHAT_ID = "-1001869822416"
-
-        logger.register_development_logger()
-        logging.warn("Running in DEVELOPMENT mode")
-
-    elif environment == "production":
-        constants.VAGAS_CHAT_ID = "-1001909104760"
-        constants.CARDAPIO_CHAT_ID = "-1001663438555"
-        # constants.NOTICIAS_CHAT_ID = ""
-
-        logger.register_production_logger()
-        logging.warn("Running in PRODUCTION mode!")
-
-    else:
-        raise Exception(f"Problems setting {environment} environment.")
