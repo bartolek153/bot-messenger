@@ -7,7 +7,7 @@ import time
 
 import constants
 from logs import logger
-from requests import Response
+from requests import Response, Session
 
 
 def vm_localtime(hour: int, minute: int = 0) -> str:
@@ -22,10 +22,9 @@ def vm_localtime(hour: int, minute: int = 0) -> str:
         str: the local time in HH:mm format
     """
 
-    if hour == None:
+    if hour is None:
         raise Exception("Filling hour argument is mandatory.")
 
-    # Create a datetime object representing the given time in Brazil
     brazil_time = datetime.datetime.combine(
         datetime.datetime.today(), datetime.time(hour=hour, minute=minute)
     )
@@ -47,6 +46,7 @@ def vm_localtime(hour: int, minute: int = 0) -> str:
 def only_weekday(func):
     """
     A decorator that wraps a function and only allows it to run if it's a weekday (Monday to Friday).
+    Does not apply when debugging.
 
     Parameters:
         `func` (callable): the function to wrap
@@ -56,14 +56,14 @@ def only_weekday(func):
     """
 
     def wrapper(*args, **kwargs):
-        today = datetime.datetime.now()
-        # Retorna um número entre 0 e 6, sendo 0 segunda-feira e 6 domingo
-        weekday = today.weekday()
+        if os.getenv("PRODUCTION"):
+            today = datetime.datetime.now()
+            weekday = today.weekday()
 
-        if weekday < 5:  # Se for segunda a sexta-feira (0 a 4)
-            return func(*args, **kwargs)
-        else:
-            print("weekend")
+            if not weekday < 5:  # not between monday and friday (0 to 4)
+                return
+
+        func(*args, **kwargs)
 
     return wrapper
 
@@ -71,6 +71,7 @@ def only_weekday(func):
 def only_business_time(func):
     """
     A decorator that wraps a function and only allows it to run during business hours (9:00 to 20:00).
+    Does not apply when debugging.
 
     Parameters:
         `func` (callable): the function to wrap
@@ -80,15 +81,24 @@ def only_business_time(func):
     """
 
     def wrapper(*args, **kwargs):
-        now = datetime.datetime.now().time()
+        if os.getenv("PRODUCTION"):
+            now = datetime.datetime.now().time()
 
-        if datetime.time(9, 0) <= now <= datetime.time(20, 0):
-            return func(*args, **kwargs)
+            if not datetime.time(9, 0) <= now <= datetime.time(20, 0):
+                return
+
+        return func(*args, **kwargs)
 
     return wrapper
 
 
-def make_request(url, method, session=None, data=None) -> Response:
+def make_request(
+    url: str, 
+    method: str, 
+    data=None,
+    headers=None,
+    params=None,
+    session: Session=None) -> Response:
     """
     Placeholder function that makes a request to a specified URL.
 
@@ -99,20 +109,30 @@ def make_request(url, method, session=None, data=None) -> Response:
 
     Returns:
         response object resulted of the request made
+
+    Raises:
+        exceptions related to unsuccessful http requests
     """
 
-    try:
-        with session:
-            if data:
-                return session.get(url, data)
-            else:
-                return session.get(url)
-    except Exception as e:
-        logging.error(f"An error occurred while making a request: {e}")
-        return None
+    if session is None:
+        session = Session()
+
+    with session as session:
+        response = session.request(
+            method=method,
+            url=url,
+            headers=headers,
+            data=data,
+            params=params
+        )
+
+        if response.ok:
+            return response
+        else:
+            response.raise_for_status()
 
 
-def write_to_file(content, filename):
+def write_to_file(content: str, filename: str):
     """
     Designed to store strings with big content in a separate file.
 
@@ -124,7 +144,7 @@ def write_to_file(content, filename):
         file.write(content)
 
 
-def append_to_file(content, filename):
+def append_to_file(content: str, filename: str):
     """
     Appends text to a file. If the file doesn't exists, create a new file.
 
@@ -137,7 +157,7 @@ def append_to_file(content, filename):
         f.write
 
 
-def read_file(filename) -> str:
+def read_file(filename: str) -> str:
     """
     Gets the text of a file.
 
@@ -164,9 +184,9 @@ def set_environment(environment):
     """
 
     if environment == "development":
-        constants.VAGAS_CHAT_ID = constants.CARDAPIO_CHAT_ID = constants.NOTICIAS_CHAT_ID = (
-            "-1001869822416"
-        )
+        constants.VAGAS_CHAT_ID = (
+        constants.CARDAPIO_CHAT_ID
+        ) = constants.NOTICIAS_CHAT_ID = "-1001869822416"
 
         logger.register_development_logger()
         logging.warn("Running in DEVELOPMENT mode")

@@ -1,6 +1,5 @@
 .env/
 .venv/
-.vscode/
 
 *.json
 !launch.json

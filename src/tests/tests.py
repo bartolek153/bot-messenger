@@ -40,12 +40,9 @@ async def test_telegram_bot():
         print((await bot.get_updates()))
 
 def test_messaging():
-    ch.send(constants.VAGAS_CHAT_ID, "teste")
-
-def test_request_helper():
-    make_request("asdf", "GET")
+    ch.send(constants.VAGAS_CHAT_ID, "testesss", True)
 
 # test_job_execution()
-# test_menu_execution()
+test_menu_execution()
 # test_messaging()
-test_request_helper()
+# test_request_helper()

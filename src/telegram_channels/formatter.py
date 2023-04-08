@@ -1,15 +1,14 @@
 import emoji
+from telegram.helpers import escape_markdown
+
 import constants
 
 
-def emojis(message:str, job: dict):
-
+def enhance(message: str, job: dict) -> str:
     EMOJIS = constants.JOB_FIELDS
 
     for field, detail in job.items():
         if detail:
-            message += f"{EMOJIS.get(field, '')} {field}: {detail.capitalize()}; \n"
+            message += f"{EMOJIS.get(field, '')} <i><b>{field}</b></i>: {detail.capitalize()}\n\n"
 
-    # print(emoji.emojize(message_header))
-
-    return message
+    return emoji.emojize(message)

@@ -1,13 +1,12 @@
 import requests
 import logging
 from bs4 import BeautifulSoup
-from typing import List
-import os
+from typing import List, Union
 import time
 
 import constants
 from data.dao import DAO
-from helper import only_business_time
+from helper import only_business_time, make_request
 from telegram_channels import channels, formatter
 
 
@@ -18,13 +17,14 @@ class Job:
     @only_business_time
     def execute(self):
         """
-        Executes the job scraper. Retrieves jobs, parses them, saves them to the database,
+        Retrieves jobs, parses them, saves them to the database,
         and sends alerts when there are new job listings.
 
         Skips execution when off schedule (09h-20h).
         """
 
         logging.info("Fetching jobs...")
+        start = time.time()
 
         try:
             jobs = self._get_jobs()
@@ -44,32 +44,31 @@ class Job:
                     job_count += 1
 
                 self.dao.created = True
-                logging.info(
-                    "Database created and data was loaded successfully.")
+                logging.info("Database created and data was loaded successfully.")
 
             else:
                 # after being run for the first time, it will start sending alerts
 
-                job_history = self._parse_jobs(
-                    jobs, constants.LIMIT_JOBS_PER_FETCH
-                )
+                job_history = self._parse_jobs(jobs, constants.LIMIT_JOBS_PER_FETCH)
 
                 for job in list(reversed(job_history)):
-
                     # if the job is already registered, do not alert
+
                     if not self._exists_db(job):
                         self._insert_db(job)
                         job_count += 1
 
-                        self._send_job_alert(job, False)
+                        self._send_job_alert(job, True)
 
-            return logging.info(f"{job_count} jobs inserted.")
+            end = time.time()
+            elapsed_time = end - start
+
+            return logging.info(f"{job_count} jobs inserted ({elapsed_time:.2f}s).")
 
         except Exception as e:
-            logging.exception(e)
-            return
+            logging.error(e)
 
-    def _get_jobs(self) -> str:
+    def _get_jobs(self) -> Union[None, str]:
         """
         Retrieves job listings HTML from the website.
 
@@ -77,28 +76,29 @@ class Job:
             str: Job listings HTML.
         """
 
-        # TODO: helper.make_request
-
-
         for attempt in range(constants.MAX_ATTEMPTS):
-
             with requests.Session() as ses:
-                ses.post(constants.LOGIN_URL, data=constants.USUARIO)
-                jobs = ses.get(constants.VAGAS_URL, data={"IdCurso": 4})
-
-                if jobs.ok:
-                    return jobs.text
-                else:
-                    logging.warn(
-                        f"Attempt {attempt+1} failed (get_jobs() - code {jobs.status_code})"
+                try:
+                    make_request(constants.LOGIN_URL, "POST",
+                        session=ses,
+                        data=constants.USUARIO,
                     )
+
+                    return make_request(constants.VAGAS_URL, "GET", 
+                        session=ses, 
+                        data={"IdCurso": 4}
+                    ).text
+
+                except Exception as e:
+                    logging.error(f"An error occurred while making the request: {e}")
+                    logging.warn(f"Attempt {attempt+1} failed (_get_jobs())")
                     time.sleep(constants.INTERVAL_MINUTES)
 
         else:
             logging.critical("Problems found when trying to get jobs")
             return None
 
-    def _parse_jobs(self, jobs: str, limit: int = None) -> List[dict]:
+    def _parse_jobs(self, jobs: str, limit=None) -> List[dict]:
         """
         Parses job listings HTML to extract relevant information.
 
@@ -117,14 +117,11 @@ class Job:
         _FILTER = ["Email:"]
 
         for row in parsed_html.find_all("div", class_="row"):
-
             if any(forbidden_row in row.text for forbidden_row in _FILTER):
                 continue
 
             for inner_div in row.find_all("div"):
-
                 if inner_div.text.replace("\n", "").strip():
-
                     for strong in inner_div.find_all("strong"):
                         strong.decompose()
 
@@ -179,20 +176,18 @@ class Job:
         message = "Nova vaga cadastrada:\n\n"
 
         if insert_emojis:
-            message = formatter.emojis(message, job)
+            message = formatter.enhance(message, job)
         else:
             message += "\n".join(
-                f"{key}: {value.capitalize()}"
-                for key, value in job.items()
-                if value
+                f"{key}: {value.capitalize()}" for key, value in job.items() if value
             )
 
         channels.send(constants.VAGAS_CHAT_ID, message)
 
-    def _exists_db(self, job) -> bool:  
+    def _exists_db(self, job) -> bool:
         """checks if a job listing already exists in the database"""
         search = self.dao.jobs.search(self.dao.query.fragment(job))
-        return len(search) > 0  
+        return len(search) > 0
 
     def _insert_db(self, job) -> None:
         self.dao.jobs.insert(job)

@@ -8,6 +8,18 @@
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PRODUCTION": "enabled"
+            }
+        },
+
+        {
+            "name": "Debug",
+            "type": "python",
+            "request": "launch",
             "program": "${cwd}/src/tests/tests.py",
             "console": "integratedTerminal",
             "justMyCode": true

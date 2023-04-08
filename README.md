@@ -21,9 +21,9 @@ A python script, scheduled to run periodically, which analyzes the latest conten
 
 * New Features:
     - Get `News` section
-    - Pin chat messages
 
 * Code Improvement:
+    - Regular expressions
     - Asynchronous flow
     - Comments and docstrings
     - Use environment variables for production and development status

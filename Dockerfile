@@ -1,5 +1,5 @@
 # Usa a imagem oficial do Python como base
-FROM python:bullseye
+FROM python:slim-bullseye
 
 # Define o diretório de trabalho
 WORKDIR /app
