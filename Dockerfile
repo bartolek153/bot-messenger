@@ -1,5 +1,6 @@
 FROM python:slim-bullseye
 WORKDIR /app
+VOLUME /app
 
 COPY . .
 COPY requirements.txt .

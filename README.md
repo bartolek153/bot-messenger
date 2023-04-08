@@ -16,8 +16,7 @@ A python script, scheduled to run periodically, which analyzes the latest conten
 ## **TODO**
 
 * Deploy:
-    - Create a deploy script
-    - Attach data volume (db + logs)
+    - Pipelines
 
 * New Features:
     - Get `News` section
