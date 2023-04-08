@@ -2,6 +2,12 @@
 
 A python script, scheduled to run periodically, which analyzes the latest contents of HTML pages, processes them and sends the obtained data to a Telegram channel.
 
+## Install and run with Docker
+
+```bash
+curl -sSL https://raw.githubusercontent.com/bartolek153/bot-messenger/main/deploy.sh | sh
+```
+
 ## Features:
 
 1. HTML Parsing;
