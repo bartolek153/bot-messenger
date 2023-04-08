@@ -13,6 +13,7 @@ from telegram_channels import channels, formatter
 class Job:
     def __init__(self):
         self.dao = DAO.get_instance()
+        self.execute()
 
     @only_business_time
     def execute(self):
@@ -63,6 +64,7 @@ class Job:
             end = time.time()
             elapsed_time = end - start
 
+            self.dao.calculate_db_size()
             return logging.info(f"{job_count} jobs inserted ({elapsed_time:.2f}s).")
 
         except Exception as e:
@@ -95,7 +97,7 @@ class Job:
                     time.sleep(constants.INTERVAL_MINUTES)
 
         else:
-            logging.critical("Problems found when trying to get jobs")
+            logging.critical("Problems found when trying to fetch jobs")
             return None
 
     def _parse_jobs(self, jobs: str, limit=None) -> List[dict]:

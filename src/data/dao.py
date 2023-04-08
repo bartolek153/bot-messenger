@@ -31,15 +31,15 @@ class DAO:
         return DAO._instance
 
     def __init__(self):
-        path = os.path.join(parent_dir, "data", "db.json")
+        self.path = os.path.join(parent_dir, "data", "db.json")
 
-        if os.path.exists(path):
+        if os.path.exists(self.path):
             DAO.created = True
-            DAO.size = os.path.getsize(path)
+            self.calculate_db_size()
         else:
             logging.info("Empty database created")
 
-        self.db = TinyDB(path, sort_keys=True, indent=2, separators=(",", ":"))
+        self.db = TinyDB(self.path, sort_keys=True, indent=2, separators=(",", ":"))
         self.query = Query()
 
         self.jobs = self.db.table("Jobs")
@@ -51,11 +51,14 @@ class DAO:
         else:
             DAO._instance = self
 
-    def insert_db():
+    def calculate_db_size(self):
+        DAO.size = os.path.getsize(self.path)
+
+    def insert_db(self):
         pass
 
-    def update_db():
+    def update_db(self):
         pass
 
-    def delete_db():
+    def delete_db(self):
         pass

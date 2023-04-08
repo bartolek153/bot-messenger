@@ -7,3 +7,5 @@ IMAGE_NAME=bot-messenger:$(git describe --abbrev=0 --tags)
 
 docker build -t $IMAGE_NAME .
 docker run -d --rm -v $(pwd):/app --name bot $IMAGE_NAME
+
+docker images bot-messenger --format "{{.Size}}"

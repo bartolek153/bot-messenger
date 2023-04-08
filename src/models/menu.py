@@ -42,7 +42,7 @@ class Menu:
             return logging.info(f"Menu sent with success ({elapsed_time:.2f}s)")
 
         except Exception as e:
-            logging.debug(e)
+            logging.error(e)
 
     def _get_menu(self) -> Union[None, str]:
         """
@@ -72,7 +72,7 @@ class Menu:
                 time.sleep(constants.INTERVAL_MINUTES)
 
         else:
-            logging.critical("Problems found when trying to get jobs")
+            logging.critical("Problems found when trying to get menu")
             return None
 
     def _extract_info(self, html) -> str:
@@ -88,6 +88,9 @@ class Menu:
 
         weekday = datetime.today().weekday()
         weekday_fullname = constants.DIAS_SEMANA.get(weekday)
+
+        if weekday_fullname is None:
+            raise Exception("Fullname of dayweek was not registered")
 
         day_index = div_content.lower().find(weekday_fullname.lower())
 

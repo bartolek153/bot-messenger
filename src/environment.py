@@ -9,6 +9,9 @@ def production_environment():
 
     if not os.environ.get("PRODUCTION"):
         raise Exception("Set environment variables before running in production mode!")
+        
+    if not os.path.exists("credentials.ini"):
+        raise Exception("The credentials file is not available")
 
     constants.VAGAS_CHAT_ID = "-1001909104760"
     constants.CARDAPIO_CHAT_ID = "-1001663438555"
@@ -20,6 +23,9 @@ def production_environment():
 
 def development_environment():
     """ Settings for development mode """
+        
+    if not os.path.exists("credentials.ini"):
+        raise Exception("The credentials file is not available")
 
     # Tests channel
     constants.VAGAS_CHAT_ID = (
