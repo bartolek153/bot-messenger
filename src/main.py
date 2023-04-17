@@ -17,7 +17,7 @@ def main():
     _menu = Menu()
 
     def cardapio_job():
-        _menu.execute()
+        _menu.fetch()
 
     def vagas_job():
         _job.execute()

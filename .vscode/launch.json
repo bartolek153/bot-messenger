@@ -5,24 +5,23 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Production",
-            "type": "python",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "env": {
-                "PRODUCTION": "enabled"
-            }
-        },
-
-        {
             "name": "Debug",
             "type": "python",
             "request": "launch",
             "program": "${cwd}/src/tests/tests.py",
             "console": "integratedTerminal",
             "justMyCode": true
+        },
+        {
+            "name": "Production",
+            "type": "python",
+            "request": "launch",
+            "program": "${cwd}/src/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PRODUCTION": "enabled"
+            }
         },
     ]
 }

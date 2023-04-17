@@ -47,7 +47,7 @@ curl -sSL https://raw.githubusercontent.com/bartolek153/bot-messenger/main/deplo
 
 </br>
 
-* **data/** - Data Access Layer, which stores `db.json` and contains a Singleton object, that communicates with the database.
+* **data/** - Data Access Layer (database interface), which stores `db.json` and contains a Singleton object, that communicates with the database.
 * **logs/** - Set up log handlers, accordingly to the current environment. When running in production mode, keeps history of logs in `app.log`.
 * **models/** - Contains the logic necessary to gather information/data. Each area of interest is placed under a different module.
 * **telegram_channels/** - communication endpoint between this script and Telegram.
@@ -72,3 +72,4 @@ curl -sSL https://raw.githubusercontent.com/bartolek153/bot-messenger/main/deplo
 * Code Improvement:
     - Regular expressions
     - Asynchronous flow
+    - Timer decorator (inspect function details)

@@ -5,6 +5,7 @@ import os
 import sys
 
 from tinydb import TinyDB, Query
+from tinydb.table import Table
 
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -35,7 +36,7 @@ class DAO:
 
         if os.path.exists(self.path):
             DAO.created = True
-            self.calculate_db_size()
+            self._calculate_db_size()
         else:
             logging.info("Empty database created")
 
@@ -51,14 +52,34 @@ class DAO:
         else:
             DAO._instance = self
 
-    def calculate_db_size(self):
+    def _calculate_db_size(self):
         DAO.size = os.path.getsize(self.path)
 
-    def insert_db(self):
-        pass
+    def exists_db(self, table: Table, data: dict) -> bool:
+        """
+        Checks if a row already exists in the database
 
-    def update_db(self):
-        pass
+        Args:
+            table (object): the table to search
+            data (dict): the data to search
 
-    def delete_db(self):
-        pass
+        Returns:
+            bool: True if the row exists, False otherwise
+        """
+
+        search = table.search(self.query.fragment(
+            data
+        ))
+        return len(search) > 0
+
+    def insert_db(self, table, data) -> None:
+        table.insert(data)
+        self._calculate_db_size()
+
+    def update_db(self, table, data) -> None:
+        table.update(data)
+        self._calculate_db_size()
+
+    def delete_db(self, table, data) -> None:
+        table.remove(data)
+        self._calculate_db_size()

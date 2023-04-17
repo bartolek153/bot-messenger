@@ -18,10 +18,10 @@ class Job:
     @only_business_time
     def execute(self):
         """
-        Retrieves jobs, parses them, saves them to the database,
+        Retrieves jobs, parses, saves them to the database,
         and sends alerts when there are new job listings.
 
-        Skips execution when off schedule (09h-20h).
+        Skips execution when off schedule (only runs 09h-20h).
         """
 
         logging.info("Fetching jobs...")
@@ -29,11 +29,10 @@ class Job:
 
         try:
             jobs = self._get_jobs()
+            _jobs_inserted = 0
 
             if jobs is None:  # couldn't get jobs
                 return
-
-            job_count = 0
 
             if not self.dao.created or self.dao.size == 0:
                 # in the first execution, save the entire database
@@ -41,8 +40,8 @@ class Job:
                 job_history = self._parse_jobs(jobs)
 
                 for job in job_history:
-                    self._insert_db(job)
-                    job_count += 1
+                    self.dao.insert_db(self.dao.jobs, job)
+                    _jobs_inserted += 1
 
                 self.dao.created = True
                 logging.info("Database created and data was loaded successfully.")
@@ -56,16 +55,15 @@ class Job:
                     # if the job is already registered, do not alert
 
                     if not self._exists_db(job):
-                        self._insert_db(job)
-                        job_count += 1
+                        self.dao.insert_db(self.dao.jobs, job)
+                        _jobs_inserted += 1
 
                         self._send_job_alert(job, True)
 
             end = time.time()
             elapsed_time = end - start
 
-            self.dao.calculate_db_size()
-            return logging.info(f"{job_count} jobs inserted ({elapsed_time:.2f}s).")
+            return logging.info(f"{_jobs_inserted} jobs inserted ({elapsed_time:.2f}s).")
 
         except Exception as e:
             logging.error(e)
@@ -185,17 +183,3 @@ class Job:
             )
 
         channels.send(constants.VAGAS_CHAT_ID, message)
-
-    def _exists_db(self, job) -> bool:
-        """checks if a job listing already exists in the database"""
-        search = self.dao.jobs.search(self.dao.query.fragment(job))
-        return len(search) > 0
-
-    def _insert_db(self, job) -> None:
-        self.dao.jobs.insert(job)
-
-    def _update_db(self, job) -> None:
-        self.dao.jobs.update(job)
-
-    def _delete_db(self, job) -> None:
-        self.dao.jobs.remove(job)

@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup
 from datetime import datetime
-import emoji
 import logging
 import requests
 import time
@@ -12,11 +11,11 @@ from telegram_channels import channels
 
 
 class Menu:
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
     @only_weekday
-    def execute(self):
+    def fetch(self):
         """
         Retrieves the menu, for the current day of the week, and sends it
         to the Telegram channel.
@@ -110,7 +109,7 @@ class Menu:
 
         return menu
 
-    def _send_alert(self, menu):
+    def _send_alert(self, menu) -> None:
         """
         Sends the menu on the channel.
 
@@ -118,5 +117,5 @@ class Menu:
             `menu` (str)
         """
 
-        menu = emoji.emojize(":fork_and_knife_with_plate: ") + menu
-        channels.send(chat_id=constants.CARDAPIO_CHAT_ID, message=menu, pin=True)
+        # menu = emoji.emojize(":fork_and_knife_with_plate: ") + menu
+        channels.send(chat_id=constants.CARDAPIO_CHAT_ID, message=menu, pin=False)

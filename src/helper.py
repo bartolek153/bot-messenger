@@ -3,7 +3,10 @@
 import datetime
 import logging
 import os
+from PIL import Image
 import time
+from typing import List
+import unicodedata
 
 import constants
 from logs import logger
@@ -170,3 +173,47 @@ def read_file(filename: str) -> str:
 
     with open(filename, "r") as f:
         return f.read()
+
+def merge_images_vertically(images: list) -> Image.Image:
+    """
+    Merge a list containing `Image` objects into a single image, vertically.
+
+    Parameters:
+        `images` (list): a list of `Image` objects
+    
+    Returns:
+        `Image` object: the merged image
+    """
+
+    # unzip list of images into two lists containing 
+    # the widths and heights of each image
+    widths, heights = zip(*(i.size for i in images))
+
+    total_width = max(widths)
+    max_height = sum(heights)
+
+    new_image = Image.new(images[0].mode, (total_width, max_height))
+
+    y_offset = 0
+    for image in images:
+        new_image.paste(image, (0, y_offset))
+        y_offset += image.size[1]
+
+    return new_image
+
+def remove_accents(text: str) -> str:
+    """
+    Remove accents from a string using NFKD, 
+    or from dictionary values (recursively).
+
+    Parameters:
+        `text` (str): the string to remove accents from
+
+    Returns:
+        str: the string without accents
+    """
+
+    if isinstance(text, dict):
+        return {k: remove_accents(v) for k, v in text.items()}
+    else:
+        return unicodedata.normalize("NFKD", text).encode("ASCII", "ignore").decode("ASCII")

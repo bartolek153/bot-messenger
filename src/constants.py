@@ -61,3 +61,4 @@ JOB_FIELDS = {
 
 """ News consts """
 ID_DIV_NOTICIAS = "colapseQuadroAvisos"
+LIMIT_NEWS_PER_FETCH = 3
