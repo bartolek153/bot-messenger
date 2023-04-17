@@ -118,5 +118,5 @@ class Menu:
             `menu` (str)
         """
 
-        menu = emoji.emojize(":fork_and_knife_with_plate: ") + menu
+        # menu = emoji.emojize(":fork_and_knife_with_plate: ") + menu
         channels.send(chat_id=constants.CARDAPIO_CHAT_ID, message=menu, pin=True)
