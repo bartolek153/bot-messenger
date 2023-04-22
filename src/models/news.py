@@ -1,14 +1,16 @@
 from bs4 import BeautifulSoup
-from concurrent.futures import ThreadPoolExecutor, wait
+from concurrent.futures import ThreadPoolExecutor, TimeoutError
 from io import BytesIO
 import logging
 from PIL import Image
 from queue import Queue
 import requests
+from telegram.helpers import escape_markdown as escape
 
 import constants
 from data.dao import DAO
 from helper import *
+from telegram_channels import channels
 
 
 class News:
@@ -19,7 +21,6 @@ class News:
 
     def execute(self):
         try:
-
             news = self._get_news()
 
             if news is None:
@@ -30,13 +31,8 @@ class News:
 
             t1 = time.time()
 
-            with ThreadPoolExecutor() as executor:
-                # submit the jobs to the executor
-                _t1 = executor.submit(self._parse, news)
-                _t2 = executor.submit(self._validate)
-
-                # wait for both futures to complete
-                wait([_t1, _t2])
+            self._parse(news)
+            self._validate()
 
             t2 = time.time()
             print(f"Time elapsed: {t2-t1:.2f}s")
@@ -76,34 +72,27 @@ class News:
         parsed_html = BeautifulSoup(news, features="html.parser")
         div_content = parsed_html.find(id=constants.ID_DIV_NOTICIAS)
 
-        # Replace <b> and <strong> tags with asterisks
-        for tag in div_content.find_all(["b", "strong"]):
-            tag.replace_with("*" + tag.text.replace("\n", "").strip() + "*")
+        # Unwraps <ul>, <ol> tags
+        for tag in div_content.find_all(["ul", "ol", "p", "span", "br"]):
+            tag.unwrap()
 
-        # Replace <i> tags with asterisks
-        for tag in div_content.find_all("i"):
-            tag.replace_with("_" + tag.text.replace("\n", "").strip() + "_")
-
-        # Replace <u> tags with underscores
-        for tag in div_content.find_all("u"):
-            tag.replace_with(" __ " + tag.text.replace("\n", "").strip() + " __ ")
-
-        # Replace <li> tags with hyphens
+        # # Replace <li> tags with hyphens
         for tag in div_content.find_all("li"):
-            tag.replace_with("- " + tag.text.replace("\n", "").strip())
+            tag.replace_with("* " + tag.text.replace("\n", "").strip())
 
         ses = requests.Session()
         # write_to_file(str(div_content), "a.html")
 
         for row in div_content.find_all("div", class_="panel panel-default"):
             title = row.find_next(class_="panel-title").text.replace("\n", "").strip()
-            body = row.find_next("div", class_="panel-body")
+            body = row.find_next("div", class_="panel-body panel-collapse collapse")
+
             _images = []
 
             # Convert <a> tags to markdown
-            for tag in body.find_all("a"):
-                url = tag.attrs["href"]
-                tag.replace_with(f"[{tag.text}]({url})")
+            # for tag in body.find_all("a"):
+            #     url = tag.attrs["href"]
+            #     tag.replace_with(f"[{tag.text}]({url})")
 
             if len(img_tags := body.find_all("img")) > 0:
                 # continue
@@ -117,35 +106,46 @@ class News:
                 body = merge_images_vertically(_images)
                 _images.clear()
             else:
-                body = body.text.strip()
-
-            # print(body)
-            # print("____")
+                # needed to reinstantiate BeautifulSoup 
+                # because when trying to unwrap <div> tag,
+                # nothing was being returned (empty string only)
+                body = BeautifulSoup(str(body), "html.parser")
+                body.div.unwrap()
+                body = str(body).strip()
 
             _news_data = {"title": title, "body": body}
-
             self.queue.put(_news_data)
-            print("put")
+
         self.queue.put(None)
 
-        print("Done")
-
-    def _validate(self):
+    def _validate(self) -> None:
         while True:
             news_data = self.queue.get()
-            print("get")
 
             if news_data is None:
                 break
 
-            copy_data = news_data.copy()
-            copy_data.pop("body")
+            try:
+                news_data_copy = news_data.copy()
+                news_data_copy.pop("body")
 
-            if not self.dao.exists_db(self.dao.news, copy_data):
-                self._send()
-                self.dao.insert_db(self.dao.news, copy_data)
+                if not self.dao.exists_db(self.dao.news, news_data_copy):
+                    self._send(news_data)
+                    # self.dao.insert_db(self.dao.news, news_data_copy)
 
-        print("Done")
+            except Exception as e:
+                logging.critical(f"Exception with '{news_data['title']}': {e}")
 
-    def _send(self):
-        raise NotImplementedError()
+    def _send(self, data: dict) -> None:
+        match type(data["body"]):
+            case Image.Image:
+                channels.send(
+                    constants.NOTICIAS_CHAT_ID,
+                    message=data["title"],
+                    image=data["body"],
+                )
+            case str:
+                channels.send(
+                    constants.NOTICIAS_CHAT_ID,
+                    message=f"<strong>{data['title']}</strong>\n\n<i>{data['body']}</i>",
+                )

@@ -8,7 +8,7 @@ import constants
 from logs import logger
 
 
-def production_environment():
+def set_production():
     """ Sets variables and some settings for production mode """
 
     if not os.environ.get("PRODUCTION"):
@@ -22,7 +22,7 @@ def production_environment():
     logging.warn("Running in PRODUCTION mode!")
 
 
-def development_environment():
+def set_development():
     """ Settings for development mode """
         
     if not os.path.exists("credentials.ini"):

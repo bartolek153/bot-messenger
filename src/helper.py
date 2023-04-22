@@ -4,6 +4,7 @@ import datetime
 import logging
 import os
 from PIL import Image
+from telegram.helpers import escape_markdown
 import time
 from typing import List
 import unicodedata
@@ -171,7 +172,7 @@ def read_file(filename: str) -> str:
         str: content of the file.
     """
 
-    with open(filename, "r") as f:
+    with open(filename, "r", encoding='iso-8859-1') as f:
         return f.read()
 
 def merge_images_vertically(images: list) -> Image.Image:

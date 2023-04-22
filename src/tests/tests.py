@@ -5,7 +5,7 @@ currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 
-from environment import development_environment
+import environment
 import asyncio
 from datetime import datetime
 import logging
@@ -20,7 +20,7 @@ from models.jobs import Job
 from models.menu import Menu
 from models.news import News
 
-development_environment()
+environment.set_development()
 
 def test_request_helper():
     make_request()

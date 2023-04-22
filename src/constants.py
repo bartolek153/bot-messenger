@@ -46,7 +46,7 @@ DIAS_SEMANA = {
 }
 
 """ Jobs consts """
-LIMIT_JOBS_PER_FETCH = 3
+LIMIT_JOBS_PER_FETCH = 5
 JOB_FIELDS = {
     "Data do Cadastro": ":calendar:",
     "Empresa": ":office_building:",

@@ -179,7 +179,7 @@ class Job:
             message = formatter.enhance(message, job)
         else:
             message += "\n".join(
-                f"{key}: {value.capitalize()}" for key, value in job.items() if value
+                f"{key}: {value}" for key, value in job.items() if value
             )
 
         channels.send(constants.VAGAS_CHAT_ID, message)
