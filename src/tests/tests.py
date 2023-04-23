@@ -27,6 +27,7 @@ def test_request_helper():
 
 def test_news_execution():
     _news = News()
+    _news.execute()
 
 def test_job_execution():
     _job = Job()

@@ -55,6 +55,18 @@ class DAO:
     def _calculate_db_size(self):
         DAO.size = os.path.getsize(self.path)
 
+    def insert_db(self, table, data) -> None:
+        table.insert(data)
+        self._calculate_db_size()
+
+    def update_db(self, table, data) -> None:
+        table.update(data)
+        self._calculate_db_size()
+
+    def delete_db(self, table, data) -> None:
+        table.remove(data)
+        self._calculate_db_size()
+
     def exists_db(self, table: Table, data: dict) -> bool:
         """
         Checks if a row already exists in the database
@@ -70,16 +82,36 @@ class DAO:
         search = table.search(self.query.fragment(
             data
         ))
+
         return len(search) > 0
 
-    def insert_db(self, table, data) -> None:
-        table.insert(data)
-        self._calculate_db_size()
+    def contains_db(self, table: Table, query, aim_text: str) -> bool:
+        """
+        Checks if a row already exists in the database
 
-    def update_db(self, table, data) -> None:
-        table.update(data)
-        self._calculate_db_size()
+        Args:
+            table (object): the table to search
+            aim_text (str): the text to search
 
-    def delete_db(self, table, data) -> None:
-        table.remove(data)
-        self._calculate_db_size()
+        Returns:
+            bool: True if the row exists, False otherwise
+        """
+
+        return table.contains(query == aim_text)
+
+    def is_first_execution(self, table: Table):
+        """
+        Checks if the database is empty for an entity 
+        or if it is the first execution
+
+        Args:
+            table (object): the table to search
+
+        Returns:
+            bool: True if the database is empty, False otherwise
+        """
+        
+        if not self.created or self.size == 0 or len(table) == 0:
+            return True
+
+        return False

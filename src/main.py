@@ -15,6 +15,7 @@ def main():
 
     _job = Job()
     _menu = Menu()
+    _news = News()
 
     def cardapio_job():
         _menu.fetch()
@@ -22,8 +23,12 @@ def main():
     def vagas_job():
         _job.execute()
 
+    def noticias_job():
+        _news.execute()
+
     schedule.every(1).day.at(vm_localtime(17)).do(cardapio_job)
     schedule.every(2).hours.do(vagas_job)
+    schedule.every(1).day.do(vagas_job)
 
     logging.info("Tasks scheduled")
 

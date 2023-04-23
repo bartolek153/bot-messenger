@@ -72,4 +72,7 @@ curl -sSL https://raw.githubusercontent.com/bartolek153/bot-messenger/main/deplo
 * Code Improvement:
     - Regular expressions
     - Asynchronous flow
-    - Timer decorator (inspect function details)
+    - Timer Recorator (inspect function details)
+    - Requests Session Reuse
+    - Send .log by telegram
+    - Convert <table> tags to images (since Telegram API does not support it)
