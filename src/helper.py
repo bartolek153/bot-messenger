@@ -1,17 +1,15 @@
 """general usage functions"""
 
 import datetime
-import logging
 import os
 from PIL import Image
-from telegram.helpers import escape_markdown
 import time
-from typing import List
 import unicodedata
 
-import constants
-from logs import logger
 from requests import Response, Session
+
+
+session = Session()
 
 
 def vm_localtime(hour: int, minute: int = 0) -> str:
